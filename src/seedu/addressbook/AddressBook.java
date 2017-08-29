@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.HashMap;
 
 /*
  * NOTE : =============================================================
@@ -133,6 +132,11 @@ public class AddressBook {
     private static final String COMMAND_EXIT_WORD = "exit";
     private static final String COMMAND_EXIT_DESC = "Exits the program.";
     private static final String COMMAND_EXIT_EXAMPLE = COMMAND_EXIT_WORD;
+
+    private static final String COMMAND_SWAP_WORD = "swap";
+    private static final String COMMAND_SWAP_DESC = "Swaps the indexes of two existing persons.";
+    private static final String COMMAND_SWAP_PARAMETERS = "KEYWORD KEYWORD";
+    private static final String COMMAND_SWAP_EXAMPLE = COMMAND_SWAP_WORD + " alice bob";
 
     private static final String DIVIDER = "===================================================";
 
@@ -384,6 +388,8 @@ public class AddressBook {
             return getUsageInfoForAllCommands();
         case COMMAND_EXIT_WORD:
             executeExitProgramRequest();
+        case COMMAND_SWAP_WORD:
+            return executeSwapPersons(commandArgs);
         default:
             return getMessageForInvalidCommandInput(commandType, getUsageInfoForAllCommands());
         }
@@ -455,6 +461,42 @@ public class AddressBook {
         final ArrayList<String[]> personsFound = getPersonsWithNameContainingAnyKeyword(keywords);
         showToUser(personsFound);
         return getMessageForPersonsDisplayedSummary(personsFound);
+    }
+
+    private static String executeSwapPersons(String commandArgs){
+        final Set<String> keywords2 = extractKeywordsFromFindPersonArgs(commandArgs);
+        final ArrayList<String[]> personsFound2 = getPersonsWithNameContainingAnyKeyword(keywords2);
+        int firstIndex = -1, secondIndex = -1;
+        String results = "";
+        getMessageForPersonsDisplayedSummary(personsFound2);
+        if (hasValidPersonsFound(personsFound2)){
+            for (int i = 0; i < ALL_PERSONS.size(); i++){
+                for (int j = 0; j < 2; j++){
+                    if (personsFound2.get(j) == ALL_PERSONS.get(i)){
+                        if (firstIndex < 0){
+                            firstIndex = i;
+                        }
+                        else {
+                            secondIndex = i;
+                        }
+                    }
+                }
+            }
+            Collections.swap(ALL_PERSONS, firstIndex, secondIndex);
+            results = "passed";
+        }
+        else{
+            results = "failed";
+        }
+        return results;
+    }
+    private static boolean hasValidPersonsFound(ArrayList<String[]> personsFound2){
+        if (personsFound2.size() == 2) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     /**
@@ -1086,10 +1128,18 @@ public class AddressBook {
         return getUsageInfoForAddCommand() + LS
                 + getUsageInfoForFindCommand() + LS
                 + getUsageInfoForViewCommand() + LS
+                + getUsageInfoForSwapCommand() + LS
                 + getUsageInfoForDeleteCommand() + LS
                 + getUsageInfoForClearCommand() + LS
                 + getUsageInfoForExitCommand() + LS
                 + getUsageInfoForHelpCommand();
+    }
+
+    /** Returns the string for showing 'swap' command usage instruction */
+    private static String getUsageInfoForSwapCommand(){
+        return String.format(MESSAGE_COMMAND_HELP, COMMAND_SWAP_WORD, COMMAND_SWAP_DESC) + LS
+                + String.format(MESSAGE_COMMAND_HELP_PARAMETERS, COMMAND_SWAP_PARAMETERS) + LS
+                + String.format(MESSAGE_COMMAND_HELP_EXAMPLE, COMMAND_SWAP_EXAMPLE) + LS;
     }
 
     /** Returns the string for showing 'add' command usage instruction */
