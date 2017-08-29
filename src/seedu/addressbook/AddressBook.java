@@ -165,6 +165,11 @@ public class AddressBook {
      */
     private static final char INPUT_COMMENT_MARKER = '#';
 
+    /**
+     * The initial index before transversing a list.
+     */
+    private static final int SET_INITIAL_INDEX = 1;
+
     /*
      * This variable is declared for the whole class (instead of declaring it
      * inside the readUserCommand() method to facilitate automated testing using
@@ -463,33 +468,33 @@ public class AddressBook {
         return getMessageForPersonsDisplayedSummary(personsFound);
     }
 
+    /**
+     * Finds and swaps the indexes of two persons in which the user provides the names.
+     * Keyword matching is case sensitive.
+     *
+     * @param commandArgs full command args string from the user
+     * @return feedback display message for the operation result
+     */
     private static String executeSwapPersons(String commandArgs){
         final Set<String> keywords2 = extractKeywordsFromFindPersonArgs(commandArgs);
         final ArrayList<String[]> personsFound2 = getPersonsWithNameContainingAnyKeyword(keywords2);
-        int firstIndex = -1, secondIndex = -1;
-        String results = "";
-        getMessageForPersonsDisplayedSummary(personsFound2);
+        String results;
         if (hasValidPersonsFound(personsFound2)){
-            for (int i = 0; i < ALL_PERSONS.size(); i++){
-                for (int j = 0; j < 2; j++){
-                    if (personsFound2.get(j) == ALL_PERSONS.get(i)){
-                        if (firstIndex < 0){
-                            firstIndex = i;
-                        }
-                        else {
-                            secondIndex = i;
-                        }
-                    }
-                }
-            }
-            Collections.swap(ALL_PERSONS, firstIndex, secondIndex);
-            results = "passed";
+            swapPersonsInAddressBook(personsFound2);
+            results = "Swap completed";
         }
         else{
-            results = "failed";
+            results = "Swap failed";
         }
         return results;
     }
+
+    /**
+     * Checks if there are exactly two persons in the list matching the given keywords.
+     *
+     * @param personsFound2 persons found containing any keywords
+     * @return truth value of having exactly two persons found having the same keywords
+     */
     private static boolean hasValidPersonsFound(ArrayList<String[]> personsFound2){
         if (personsFound2.size() == 2) {
             return true;
@@ -497,6 +502,28 @@ public class AddressBook {
         else {
             return false;
         }
+    }
+
+    /**
+     * Swaps the two person in personsFound2 which exists in the AddressBook.
+     *
+     * @param personsFound2 persons found containing any keywords
+     */
+    private static void swapPersonsInAddressBook(ArrayList<String[]> personsFound2){
+        int firstIndex = SET_INITIAL_INDEX, secondIndex = SET_INITIAL_INDEX;
+        for (int i = 0; i < ALL_PERSONS.size(); i++){
+            for (int j = 0; j < 2; j++){
+                if (personsFound2.get(j) == ALL_PERSONS.get(i)){
+                    if (firstIndex == SET_INITIAL_INDEX){
+                        firstIndex = i;
+                    }
+                    else {
+                        secondIndex = i;
+                    }
+                }
+            }
+        }
+        Collections.swap(ALL_PERSONS, firstIndex, secondIndex);
     }
 
     /**
